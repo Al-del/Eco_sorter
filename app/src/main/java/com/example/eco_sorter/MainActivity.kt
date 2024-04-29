@@ -1,107 +1,217 @@
 package com.example.eco_sorter
 
-import User
+import Butt
+import Eco_SorterTheme
+import Verf
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.Slider
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeCompilerApi
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
-import com.example.eco_sorter.ui.theme.Eco_SorterTheme
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import kotlin.collections.Map
+
 
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        var username: String = "Unknown User"
+        var points: String = "0"
+        try {
+             username = intent.getStringExtra("user").toString()
+             points = intent.getStringExtra("points").toString()
+            if(username == null) {
+                username = "Unknown User"
+                points = "0"
+            }
+        }catch (e: Exception) {
+         Log.d("error","Not loged in")
+        }
+
+
+        val buti = Butt()
         setContent {
             Eco_SorterTheme {
-                SignUpScreen()
+                    buti.Myapp(id = 0, username = username, points =points )
+                    Labelus(points,username)
+                    Log.d("points",points)
+
+
             }
         }
     }
 }
 
+
 @Composable
-fun SignUpScreen() {
-    val usernameState = remember { mutableStateOf("") } // Create a mutable state for the username
-    val passwordState = remember { mutableStateOf("") } // Create a mutable state for the password
-    val context = LocalContext.current // Get the current context
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFC2F0FF)),
-        contentAlignment = Alignment.Center
+fun MyApp(navController: NavController, username: String, points: Int) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Bottom
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "Create Account",
-                style = TextStyle(color = Color(0xFF29ABCA), fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = usernameState.value, // Set the value to the current value of the username state
-                onValueChange = { usernameState.value = it }, // Update the username state when the user types into the field
-                label = { Text("Username", color = Color(0xFF29ABCA), fontSize = 14.sp) },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                textStyle = TextStyle(color = Color(0xFF333333)),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = passwordState.value, // Set the value to the current value of the password state
-                onValueChange = { passwordState.value = it }, // Update the password state when the user types into the field
-                label = { Text("Password", color = Color(0xFF29ABCA), fontSize = 14.sp) },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                textStyle = TextStyle(color = Color(0xFF333333)),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    val user = User()
-                    user.username = usernameState.value
-                    user.password = passwordState.value
-                    user.register()
-                    //Show a toast message
-                    Toast.makeText(context, "Account created successfully. Now ya can login", Toast.LENGTH_SHORT).show()
+        //Create a BOttom_buttons.kt file and paste the AnimatedBottomNavigation function there
+        // Your other Composables go here
+        AnimatedBottomNavigation(navController, username, points)
+    }
+}
 
+@Composable
+fun AnimatedBottomNavigation(navController: NavController, username: String, points: Int) {
+    // Make items a list of pairs with the label and their corresponding icon
+    val context = LocalContext.current // Get the current context
+    val items = listOf(
+        Pair("Grants", Icons.Default.Home),
+        Pair("Map", Icons.Default.Person),
+        Pair("Redeem", Icons.Default.Settings)
+    )
+
+    val selectedIndex = remember { mutableStateOf(0) }
+
+    BottomNavigation {
+        items.forEachIndexed { index, item ->
+            val isSelected = selectedIndex.value == index
+            val animatedVisibility = animateFloatAsState(if (isSelected) 1f else 0f)
+
+            BottomNavigationItem(
+                icon = { Icon(item.second, contentDescription = null) },
+                label = {
+                    AnimatedVisibility(visible = isSelected) {
+                        Text(
+                            text = item.first,
+                            modifier = Modifier.graphicsLayer {
+                                alpha = animatedVisibility.value
+                            }
+                        )
+                    }
                 },
-                modifier = Modifier.fillMaxWidth(0.8f).height(60.dp), // Adjusted height
-                colors = ButtonDefaults.buttonColors(contentColor = Color.Red) // Adjusted backgroundColor
-            ) {
-                Text("Sign Up", color = Color.White)
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Already have an account? Login",
-                style = TextStyle(color = Color(0xFF333333), fontSize = 16.sp),
-                modifier = Modifier.align(Alignment.CenterHorizontally).clickable {
-                    val intent = Intent(context, Login::class.java)
-                    context.startActivity(intent)
+                selected = isSelected,
+                onClick = {
+                    selectedIndex.value = index
+                    when (index) {
+                        0 -> {
+                            val intent = Intent(context, Main::class.java)
+                            intent.putExtra("user",username)
+                            intent.putExtra("points",points.toString())
+                            context.startActivity(intent)
+
+                        }
+                        1 -> {
+                            val intent = Intent(context, Map::class.java)
+                            intent.putExtra("user",username)
+                            intent.putExtra("points",points.toString())
+                            context.startActivity(intent)
+                        }
+                        2 -> {
+                            val intent = Intent(context, Redeem::class.java)
+                            intent.putExtra("user",username)
+                            intent.putExtra("points",points.toString())
+                            context.startActivity(intent)
+                        }
+                    }
                 }
             )
         }
     }
+}
+@Composable
+fun Labelus(Points:String?,username:String?) {
+    val context = LocalContext.current
+    if (Points != "null" && Points != null) {
+
+            Text(text = Points,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.TopEnd)
+                    .offset(y = (15).dp, x = (-15).dp)
+        ,
+                color = Color(0xFF29ABCA),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold)
+        Text(text = "$username",
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.TopStart)
+                .offset(y = (15).dp, x = (15).dp)
+            ,
+            color = Color(0xFF29ABCA),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold)
+        SliderExample(Points.toInt())
+
+    }else{
+        if (username != null) {
+            Verf(username,"You can't see your code if you are not loged in!")
+        }
+    }
+}
+@Composable
+fun SliderExample(Max_size:Int) {
+    if(Max_size.toFloat()>0) {
+        var sliderPosition by remember { mutableStateOf(0f) }
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Slider(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = sliderPosition,
+                onValueChange = { newValue ->
+                    sliderPosition = newValue
+                },
+                valueRange = 0f..Max_size.toFloat(),
+                steps = 0,
+                onValueChangeFinished = {
+                    // You can use this to trigger some action when the user finishes interacting with the slider
+                }
+            )
+            Text(
+                text = sliderPosition.toString(), color = Color(0xFF29ABCA),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+                    .offset(y = (-25).dp, x = (0).dp)
+            ) // This will display the current value of the slider
+        }
+    }
+
 }

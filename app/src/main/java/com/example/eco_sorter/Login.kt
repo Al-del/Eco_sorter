@@ -1,5 +1,6 @@
 package com.example.eco_sorter
 
+import Eco_SorterTheme
 import User
 import android.content.ContentValues.TAG
 import android.content.Intent
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,33 +30,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.eco_sorter.ui.theme.Eco_SorterTheme
-import com.google.firebase.Firebase
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.HttpUrl
+import okhttp3.Callback
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.Call
+import okhttp3.Response
+import okio.IOException
 
 class Login : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             Eco_SorterTheme {
-                val database = Firebase.database
-                val myRef = database.getReference()
-                LoginScreen(myRef)
+
+                LoginScreen()
             }
         }
     }
 }
 
 @Composable
-fun LoginScreen(databaseReference: DatabaseReference) {
+fun LoginScreen() {
     val usernameState = remember { mutableStateOf("") } // Create a mutable state for the username
     val passwordState = remember { mutableStateOf("") } // Create a mutable state for the password
+    val coroutineScope = rememberCoroutineScope() // Create a coroutine scope
     val context = LocalContext.current // Get the current context
 
     Box(
@@ -90,6 +94,62 @@ fun LoginScreen(databaseReference: DatabaseReference) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
+                    val okHttpClient = OkHttpClient()
+
+                    val httpUrl = HttpUrl.Builder()
+                        .scheme("http")
+                        .host("192.168.1.114")
+                        .port(5000)
+                        .addPathSegment("login")
+                        .addQueryParameter("username", usernameState.value)
+                        .addQueryParameter("password", passwordState.value)
+                        .build()
+
+                    val request = Request.Builder()
+                        .url(httpUrl)
+                        .build()
+
+                    okHttpClient.newCall(request).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            coroutineScope.launch(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    "server down",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                        @Throws(IOException::class)
+                        override fun onResponse(call: Call, response: Response) {
+                            if (response.isSuccessful) {
+                                val responseBody = response.body?.string()
+                                val number = responseBody?.toIntOrNull() ?: responseBody?.toDoubleOrNull()
+                                coroutineScope.launch(Dispatchers.Main) {
+
+                                    if (number != null) {
+                                        Toast.makeText(
+                                            context,
+                                            "Loged in succesful",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        val intent = Intent(context, MainActivity::class.java)
+                                        //add the user and points to the intent
+                                        intent.putExtra("user", usernameState.value)
+                                        intent.putExtra("points", number.toString())
+                                        context.startActivity(intent)
+                                    }else{
+                                        Toast.makeText(
+                                            context,
+                                            "$responseBody",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+
+                                    }
+                                }
+                            }
+                        }
+                    })
 
                 },
                 modifier = Modifier.fillMaxWidth(0.8f).height(60.dp), // Adjusted height
