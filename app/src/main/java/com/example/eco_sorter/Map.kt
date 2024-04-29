@@ -3,6 +3,7 @@ package com.example.eco_sorter
 import Butt
 import Eco_SorterTheme
 import Verf
+import adrr_ip
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -103,7 +104,7 @@ fun on_load(onMapReceived: (Map<String, Any>) -> Unit) {
 
     val formbody: RequestBody = FormBody.Builder().build()
 
-    val request: Request = Request.Builder().url("http://192.168.1.114:5000/location")
+    val request: Request = Request.Builder().url(adrr_ip+"location")
         .post(formbody)
         .build()
 

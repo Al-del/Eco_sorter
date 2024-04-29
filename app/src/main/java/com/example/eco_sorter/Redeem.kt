@@ -3,6 +3,7 @@ package com.example.eco_sorter
 import Butt
 import Eco_SorterTheme
 import Verf
+import adrr_ip
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -194,7 +195,7 @@ fun Redeem_codes(username:String,points:Int){
             // while building request
             // we give our form
             // as a parameter to post()
-            val request: Request = Request.Builder().url("http://192.168.1.114:5000/redeem")
+            val request: Request = Request.Builder().url(adrr_ip+"redeem")
                 .post(formbody)
                 .build()
 

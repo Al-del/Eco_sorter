@@ -112,11 +112,15 @@ class Butt {
         }
     }
 }
+public val ip = "192.168.1.114"
+public val adrr_ip = "http://192.168.1.114:5000/"
+
 class User {
     var username: String = ""
     var password: String = ""
     var points = 0
-
+    var discount_gaz = 0
+    var discount_electricitate = 0
 
 }
 

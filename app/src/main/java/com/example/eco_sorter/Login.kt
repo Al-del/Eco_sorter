@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ip
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.HttpUrl
@@ -98,7 +99,7 @@ fun LoginScreen() {
 
                     val httpUrl = HttpUrl.Builder()
                         .scheme("http")
-                        .host("192.168.1.114")
+                        .host(ip)
                         .port(5000)
                         .addPathSegment("login")
                         .addQueryParameter("username", usernameState.value)
@@ -135,8 +136,11 @@ fun LoginScreen() {
                                         ).show()
                                         val intent = Intent(context, MainActivity::class.java)
                                         //add the user and points to the intent
+                                        //Set precise with  2 decimal points
+                                        val numero_nush_ = String.format("%.2f", number)
+
                                         intent.putExtra("user", usernameState.value)
-                                        intent.putExtra("points", number.toString())
+                                        intent.putExtra("points", numero_nush_.toString())
                                         context.startActivity(intent)
                                     }else{
                                         Toast.makeText(
@@ -162,7 +166,7 @@ fun LoginScreen() {
                 text = "Don't have an account? Sign Up",
                 style = TextStyle(color = Color(0xFF333333), fontSize = 16.sp),
                 modifier = Modifier.align(Alignment.CenterHorizontally).clickable {
-                    val intent = Intent(context, Login::class.java)
+                    val intent = Intent(context, Main::class.java)
                     context.startActivity(intent)
                 }
             )

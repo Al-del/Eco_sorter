@@ -1,6 +1,7 @@
 package com.example.eco_sorter
 import Eco_SorterTheme
 import User
+import adrr_ip
 import android.R
 import android.content.Intent
 import android.os.Bundle
@@ -131,12 +132,14 @@ fun SignUpScreen() {
                         .add("username", utilizator.username)
                         .add("password", utilizator.password)
                         .add("points", utilizator.points.toString())
+                        .add("discount_gaz", utilizator.discount_gaz.toString())
+                        .add("discount_electricitate", utilizator.discount_electricitate.toString())
                         .build()
 
                     // while building request
                     // we give our form
                     // as a parameter to post()
-                    val request: Request = Request.Builder().url("http://192.168.1.114:5000/")
+                    val request: Request = Request.Builder().url(adrr_ip)
                         .post(formbody)
                         .build()
 
