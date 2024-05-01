@@ -112,8 +112,8 @@ class Butt {
         }
     }
 }
-public val ip = "192.168.1.114"
-public val adrr_ip = "http://192.168.1.114:5000/"
+public val ip = "192.168.100.31"
+public val adrr_ip = "http://192.168.100.31:5000/"
 
 class User {
     var username: String = ""

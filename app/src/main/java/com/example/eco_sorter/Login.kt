@@ -137,7 +137,7 @@ fun LoginScreen() {
                                         val intent = Intent(context, MainActivity::class.java)
                                         //add the user and points to the intent
                                         //Set precise with  2 decimal points
-                                        val numero_nush_ = String.format("%.2f", number)
+                                        val numero_nush_ = number
 
                                         intent.putExtra("user", usernameState.value)
                                         intent.putExtra("points", numero_nush_.toString())

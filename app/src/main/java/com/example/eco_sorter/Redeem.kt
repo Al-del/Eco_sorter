@@ -61,7 +61,7 @@ class Redeem : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val username = intent.getStringExtra("user")
-        val points = intent.getStringExtra("points")
+        var points = intent.getStringExtra("points")
 
         setContent {
                 Eco_SorterTheme {
@@ -73,7 +73,9 @@ class Redeem : ComponentActivity() {
                         if(username == "null"){
                             Verf(username, "Please login to redeem points")
                         }else{
-                            Redeem_codes(username, points!!.toInt())
+                            //Verify if points is int on doubl
+
+                            Redeem_codes(username, points)
                         }
                     }
 
@@ -157,10 +159,16 @@ fun AnimatedBottomNavigation__(navController: NavController, username: String, p
     }
 }
 @Composable
-fun Redeem_codes(username:String,points:Int){
+fun Redeem_codes(username:String,points:String?){
     var textValue by remember { mutableStateOf("") }
    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val pointsValue = points?.toDoubleOrNull() ?: points?.toIntOrNull()
+
+    if (pointsValue == null) {
+        println("The points variable could not be converted to a number")
+        return
+    }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -214,15 +222,16 @@ fun Redeem_codes(username:String,points:Int){
                 override fun onResponse(call: Call, response: Response) {
                     if (response.isSuccessful) {
                         coroutineScope.launch(Dispatchers.Main) {
-
-                                var puncte = response.body?.string()
+                            Log.d("Redeem", "Response: ${response.body?.string()}")
+                            var puncte = response.body?.string()
                             puncte = puncte.toString()
                             Toast.makeText(
                                 context,
                                 puncte,
                                 Toast.LENGTH_SHORT
                             ).show()
-
+                                //Add 100 to puncte
+                                puncte = (puncte.toDouble() + 100).toString()
                                 val intent = Intent(context, MainActivity::class.java)
                                 intent.putExtra("user", username)
                                 intent.putExtra("points", puncte)
