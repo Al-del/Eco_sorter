@@ -112,8 +112,8 @@ class Butt {
         }
     }
 }
-public val ip = "192.168.100.31"
-public val adrr_ip = "http://192.168.100.31:5000/"
+public val ip = "reliably-expert-mammoth.ngrok-free.app"
+public val adrr_ip = "reliably-expert-mammoth.ngrok-free.app"
 
 class User {
     var username: String = ""
